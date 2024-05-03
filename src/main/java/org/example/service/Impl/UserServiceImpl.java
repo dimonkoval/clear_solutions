@@ -30,6 +30,9 @@ public class UserServiceImpl implements UserService {
     public int getMinAge() {
         return minAge;
     }
+    public void setMinAge(int minAge) {
+        this.minAge = minAge;
+    }
 
     @Override
     public UserResponseDto findById(Long id) {
@@ -79,14 +82,13 @@ public class UserServiceImpl implements UserService {
         }
         Comparator<UserResponseDto> userComparator = Comparator.comparing(UserResponseDto::getBirthDate);
         if (isDescendingOrder) {
-            userComparator = userComparator.reversed(); // якщо потрібен порядок спадання
+            userComparator = userComparator.reversed();
         }
         return userRepository.findByBirthDateBetween(from, to)
                 .stream()
                 .map(userMapper::toDto)
                 .sorted(userComparator)
                 .collect(Collectors.toList());
-
     }
 
     @Override
@@ -106,7 +108,6 @@ public class UserServiceImpl implements UserService {
                 case "deleted": finalExistingUser.setDeleted((Boolean) value); break;
             }
         });
-
-        return userMapper.toDto(userRepository.save(finalExistingUser));
+        return userMapper.toDto(userRepository.save(existingUser));
     }
 }

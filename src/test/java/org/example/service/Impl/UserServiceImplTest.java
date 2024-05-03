@@ -1,14 +1,19 @@
 package org.example.service.Impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import static org.mockito.ArgumentMatchers.any;
-import org.example.controller.UserController;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
+import org.example.exception.CreateUserException;
+import org.example.exception.InvalidDateRangeException;
 import org.example.mapper.UserMapper;
 import org.example.model.User;
 import org.example.repository.UserRepository;
-import org.example.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,45 +22,34 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserServiceImplTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
+//    @Autowired
+//    private MockMvc mockMvc;
     @Mock
     private UserRepository userRepository;
     @Mock
     private UserMapper userMapper;
-    @Mock
-    private UserService userService;
-
-    @MockBean
-    private UserServiceImpl userServiceImpl;
-
     @InjectMocks
-    private UserController userController;
+    private UserServiceImpl userService;
     private UserResponseDto expectedUserResponseDto;
     private UserRequestDto expectedUserRequestDto;
     private User expectedUser;
+    private final static Long USER_ID = 1L;
+    private final static int MIN_AGE = 20;
+    private final static int MIN_AGE_TEST = 40;
 
     @BeforeEach
     void setUp() {
-        RestAssuredMockMvc.mockMvc(mockMvc);
+//        RestAssuredMockMvc.mockMvc(mockMvc);
+        userService.setMinAge(MIN_AGE);
         expectedUserResponseDto = new UserResponseDto();
-        expectedUserResponseDto.setId(1L);
+        expectedUserResponseDto.setId(USER_ID);
         expectedUserResponseDto.setEmail("test@gmail.com");
         expectedUserResponseDto.setAddress("test");
         expectedUserResponseDto.setFirstName("Joe");
@@ -63,7 +57,7 @@ class UserServiceImplTest {
         expectedUserResponseDto.setPhoneNumber("(111)111-11-11");
         expectedUserResponseDto.setBirthDate(LocalDate.parse("1900-01-01"));
         expectedUser = new User();
-        expectedUser.setId(1L);
+        expectedUser.setId(USER_ID);
         expectedUser.setEmail("test@gmail.com");
         expectedUser.setAddress("response");
         expectedUser.setFirstName("Joe");
@@ -81,13 +75,15 @@ class UserServiceImplTest {
 
     @Test
     void getMinAge_Ok() {
-        assertEquals(18, userServiceImpl.getMinAge());
+        userService.setMinAge(MIN_AGE_TEST);
+        assertEquals(MIN_AGE_TEST, userService.getMinAge());
     }
 
     @Test
     void findById_Ok() {
-        when(userService.findById(1L)).thenReturn(expectedUserResponseDto);
-        assertEquals(expectedUserResponseDto, userService.findById(1L));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.ofNullable(expectedUser));
+        when(userMapper.toDto(expectedUser)).thenReturn(expectedUserResponseDto);
+        assertEquals(expectedUserResponseDto, userService.findById(USER_ID));
     }
 
     @Test
@@ -102,34 +98,81 @@ class UserServiceImplTest {
     }
 
     @Test
-    void create_CheckMinAge_Ok() {
+    void create_CheckMinAge_NotOk() {
         expectedUserRequestDto.setBirthDate(LocalDate.now());
 
         when(userMapper.toModel(expectedUserRequestDto)).thenReturn(expectedUser);
-        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
         when(userMapper.toDto(expectedUser)).thenReturn(expectedUserResponseDto);
 
-        UserResponseDto actualResponseDto = userService.create(expectedUserRequestDto);
-
-        assertEquals(expectedUserResponseDto, actualResponseDto);
+        CreateUserException exception = assertThrows(CreateUserException.class, () -> userService.create(expectedUserRequestDto));
+        assertEquals("User must be at least " + userService.getMinAge() + " years old.", exception.getMessage());
     }
 
     @Test
     void updateUser_Ok() {
-        when(userService.findById(1L)).thenReturn(expectedUserResponseDto);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.ofNullable(expectedUser));
         when(userMapper.updateFromDto(expectedUserRequestDto, expectedUser)).thenReturn(expectedUser);
+        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
         when(userMapper.toDto(expectedUser)).thenReturn(expectedUserResponseDto);
+        UserResponseDto actualUserResponseDto = userService.updateUser(USER_ID, expectedUserRequestDto);
+        assertEquals(expectedUserResponseDto, actualUserResponseDto);
     }
 
     @Test
-    void deleteUser() {
+    void updateUserPartially_Ok() {
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("email", "update@update.com");
+        updates.put("firstName", "Update");
+
+        User updatedUser = expectedUser;
+        updatedUser.setId(USER_ID);
+        updatedUser.setEmail("Update@update.com");
+        updatedUser.setFirstName("Update");
+
+        UserResponseDto expectedDto = expectedUserResponseDto;
+        expectedDto.setEmail("Update@update.com");
+        expectedDto.setFirstName("Update");
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.ofNullable(expectedUser));
+        when(userRepository.save(updatedUser)).thenReturn(updatedUser);
+        when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+        UserResponseDto actualUserResponseDto = userService.updateUserPartially(USER_ID, updates);
+        assertEquals(expectedDto, actualUserResponseDto);
     }
 
     @Test
-    void getUsersByBirthDateRange() {
+    void deleteUser_Ok() {
+        when(userRepository.findById(USER_ID)).thenReturn(java.util.Optional.of(expectedUser));
+        userService.deleteUser(USER_ID);
+
+        verify(userRepository, times(1)).findById(USER_ID);
+        verify(userRepository, times(1)).delete(expectedUser);
     }
 
     @Test
-    void updateUserPartially() {
+    void getUsersByBirthDateRange_Ok() {
+        List<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(expectedUser);
+        when(userRepository.findByBirthDateBetween(LocalDate.parse("1900-01-01"), LocalDate.now()))
+                .thenReturn(expectedUsers);
+        when(userMapper.toDto(any(User.class))).thenReturn(expectedUserResponseDto);
+        List<UserResponseDto> expectedDtoList = expectedUsers
+                .stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
+        List<UserResponseDto> actualListDto =
+                userService.getUsersByBirthDateRange(LocalDate.parse("1900-01-01"), LocalDate.now(), false);
+        assertEquals(expectedDtoList, actualListDto);
+    }
+
+    @Test
+    void getUsersByBirthDateRange_ToMoreFrom_NotOk() {
+        InvalidDateRangeException exception = assertThrows(InvalidDateRangeException.class, () ->
+                userService.getUsersByBirthDateRange( LocalDate.now(), LocalDate.parse("1900-01-01"),false));
+        assertEquals("\"From\" date must be less than \"To\" date", exception.getMessage());
+
     }
 }
