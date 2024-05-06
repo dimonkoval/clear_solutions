@@ -2,8 +2,6 @@ package org.example.service.Impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,18 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserServiceImplTest {
-//    @Autowired
-//    private MockMvc mockMvc;
+    private final static Long USER_ID = 1L;
+    private final static int MIN_AGE = 20;
+    private final static int MIN_AGE_TEST = 40;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -40,13 +37,9 @@ class UserServiceImplTest {
     private UserResponseDto expectedUserResponseDto;
     private UserRequestDto expectedUserRequestDto;
     private User expectedUser;
-    private final static Long USER_ID = 1L;
-    private final static int MIN_AGE = 20;
-    private final static int MIN_AGE_TEST = 40;
 
     @BeforeEach
     void setUp() {
-//        RestAssuredMockMvc.mockMvc(mockMvc);
         userService.setMinAge(MIN_AGE);
         expectedUserResponseDto = new UserResponseDto();
         expectedUserResponseDto.setId(USER_ID);

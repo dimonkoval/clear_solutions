@@ -8,6 +8,7 @@ import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +29,7 @@ public class UserController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Delete user")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
     }
