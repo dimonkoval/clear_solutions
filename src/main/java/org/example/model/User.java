@@ -32,8 +32,6 @@ public class User {
     private LocalDate birthDate;
     @Column(nullable = false)
     private boolean isDeleted = false;
-    @Column(nullable = true)
     private String address;
-    @Column(nullable = true)
     private String phoneNumber;
 }

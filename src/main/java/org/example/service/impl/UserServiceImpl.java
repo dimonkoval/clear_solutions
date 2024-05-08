@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Getter
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -27,9 +30,9 @@ public class UserServiceImpl implements UserService {
     @Value("${user.minAge}")
     private int minAge;
 
-    public int getMinAge() {
-        return minAge;
-    }
+//    public int getMinAge() {
+//        return minAge;
+//    }
 
     public void setMinAge(int minAge) {
         this.minAge = minAge;

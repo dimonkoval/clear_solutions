@@ -18,7 +18,7 @@ public class UserRequestDto {
     @Past(message = "Date must be in the past")
     private LocalDate birthDate;
     private boolean isDeleted = false;
-    @Size(min = 0, max = 255, message = "maximum number of characters cannot exceed 255")
+    @Size(max = 255, message = "maximum number of characters cannot exceed 255")
     private String address;
     @Pattern(regexp = "^\\(\\d{3}\\)\\d{3}-\\d{2}-\\d{2}$", message = "Phone number must be in format (XXX)XXX-XX-XX")
     private String phoneNumber;
