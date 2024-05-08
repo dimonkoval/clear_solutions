@@ -1,9 +1,5 @@
 package org.example.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.time.LocalDate;
-import java.util.List;
 import org.example.model.User;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +12,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @Testcontainers
@@ -48,7 +49,7 @@ class UserRepositoryTest {
     @Test
     void findByBirthDateBetween_Ok() {
         List<User> actual =
-                userRepository.findByBirthDateBetween(LocalDate.parse("1900-01-01"), LocalDate.now());
+                userRepository.findByBirthDateBetween(LocalDate.of(1900, 1, 1), LocalDate.now());
         assertEquals(2, actual.size());
     }
 }
