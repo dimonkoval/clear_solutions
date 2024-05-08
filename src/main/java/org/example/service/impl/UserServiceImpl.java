@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.UserRequestDto;
@@ -29,10 +28,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     @Value("${user.minAge}")
     private int minAge;
-
-//    public int getMinAge() {
-//        return minAge;
-//    }
 
     public void setMinAge(int minAge) {
         this.minAge = minAge;
