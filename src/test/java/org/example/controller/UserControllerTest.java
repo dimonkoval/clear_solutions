@@ -78,7 +78,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserById_Ok() throws Exception {
+    void deleteUserById_Ok() {
         doNothing().when(userService).deleteUser(ArgumentMatchers.eq(USER_ID));
 
         RestAssuredMockMvc.given()
@@ -132,7 +132,7 @@ class UserControllerTest {
                 .body("firstName", Matchers.equalTo("Update"))
                 .body("lastName", Matchers.equalTo("Doe"))
                 .body("address", Matchers.equalTo("test"))
-                .body("phoneNumber", Matchers.equalTo("(111)111-11-11"));;
+                .body("phoneNumber", Matchers.equalTo("(111)111-11-11"));
     }
 
     @Test
