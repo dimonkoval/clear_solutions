@@ -10,10 +10,10 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(config = MapperConfig.class)
 public interface UserMapper {
+    @Mapping(source = "id", target = "id")
     UserResponseDto toDto(User user);
 
     User toModel(UserRequestDto requestDto);
 
-    @Mapping(target = "id", ignore = true)
     User updateFromDto(UserRequestDto dto, @MappingTarget User user);
 }

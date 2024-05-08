@@ -1,12 +1,10 @@
 package org.example.service;
 
-import org.example.dto.UserRequestDto;
-import org.example.dto.UserResponseDto;
-import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.example.dto.UserRequestDto;
+import org.example.dto.UserResponseDto;
 
 public interface UserService {
     UserResponseDto findById(Long id);

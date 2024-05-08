@@ -2,8 +2,14 @@ package org.example.controller;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.service.UserService;
@@ -20,17 +26,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
-    private final static Long USER_ID = 1L;
+    private static final Long USER_ID = 1L;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -89,7 +90,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_Ok()  {
+    void createUser_Ok() {
         when(userService.create(ArgumentMatchers.any(UserRequestDto.class))).thenReturn(expectedUserResponseDto);
         RestAssuredMockMvc
                 .given()

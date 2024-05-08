@@ -1,14 +1,23 @@
-package org.example.service.Impl;
+package org.example.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.exception.CreateUserException;
-import org.example.exception.InvalidDateRangeException;
+import org.example.exception.InvalidDateException;
 import org.example.mapper.UserMapper;
 import org.example.model.User;
 import org.example.repository.UserRepository;
@@ -25,9 +34,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserServiceImplTest {
-    private final static Long USER_ID = 1L;
-    private final static int MIN_AGE = 20;
-    private final static int MIN_AGE_TEST = 40;
+    private static final Long USER_ID = 1L;
+    private static final int MIN_AGE = 20;
+    private static final int MIN_AGE_TEST = 40;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -98,7 +107,8 @@ class UserServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(expectedUser);
         when(userMapper.toDto(expectedUser)).thenReturn(expectedUserResponseDto);
 
-        CreateUserException exception = assertThrows(CreateUserException.class, () -> userService.create(expectedUserRequestDto));
+        CreateUserException exception = assertThrows(
+                CreateUserException.class, () -> userService.create(expectedUserRequestDto));
         assertEquals("User must be at least " + userService.getMinAge() + " years old.", exception.getMessage());
     }
 
@@ -163,8 +173,8 @@ class UserServiceImplTest {
 
     @Test
     void getUsersByBirthDateRange_ToMoreFrom_NotOk() {
-        InvalidDateRangeException exception = assertThrows(InvalidDateRangeException.class, () ->
-                userService.getUsersByBirthDateRange( LocalDate.now(), LocalDate.parse("1900-01-01"),false));
+        InvalidDateException exception = assertThrows(InvalidDateException.class, () ->
+                userService.getUsersByBirthDateRange(LocalDate.now(), LocalDate.parse("1900-01-01"),false));
         assertEquals("\"From\" date must be less than \"To\" date", exception.getMessage());
 
     }

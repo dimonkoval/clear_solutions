@@ -1,10 +1,15 @@
-package org.example.service.Impl;
+package org.example.service.impl;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.exception.CreateUserException;
-import org.example.exception.InvalidDateRangeException;
+import org.example.exception.InvalidDateException;
 import org.example.exception.UserNotFoundException;
 import org.example.mapper.UserMapper;
 import org.example.model.User;
@@ -13,11 +18,6 @@ import org.example.service.UserService;
 import org.example.util.AgeCalculator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
     public int getMinAge() {
         return minAge;
     }
+
     public void setMinAge(int minAge) {
         this.minAge = minAge;
     }
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> getUsersByBirthDateRange(LocalDate from, LocalDate to, Boolean isDescendingOrder) {
 
         if (from.isAfter(to)) {
-            throw new InvalidDateRangeException("\"From\" date must be less than \"To\" date");
+            throw new InvalidDateException("\"From\" date must be less than \"To\" date");
         }
         Comparator<UserResponseDto> userComparator = Comparator.comparing(UserResponseDto::getBirthDate);
         if (isDescendingOrder) {
@@ -99,13 +100,29 @@ public class UserServiceImpl implements UserService {
         User finalExistingUser = existingUser;
         updates.forEach((key, value) -> {
             switch (key) {
-                case "email": finalExistingUser.setEmail((String) value); break;
-                case "firstName": finalExistingUser.setFirstName((String) value); break;
-                case "lastName": finalExistingUser.setLastName((String) value); break;
-                case "address": finalExistingUser.setAddress((String) value); break;
-                case "birthDate": finalExistingUser.setBirthDate(LocalDate.parse(value.toString())); break;
-                case "phoneNumber": finalExistingUser.setPhoneNumber((String) value); break;
-                case "deleted": finalExistingUser.setDeleted((Boolean) value); break;
+                case "email":
+                    finalExistingUser.setEmail((String) value);
+                    break;
+                case "firstName":
+                    finalExistingUser.setFirstName((String) value);
+                    break;
+                case "lastName":
+                    finalExistingUser.setLastName((String) value);
+                    break;
+                case "address":
+                    finalExistingUser.setAddress((String) value);
+                    break;
+                case "birthDate":
+                    finalExistingUser.setBirthDate(LocalDate.parse(value.toString()));
+                    break;
+                case "phoneNumber":
+                    finalExistingUser.setPhoneNumber((String) value);
+                    break;
+                case "deleted":
+                    finalExistingUser.setDeleted((Boolean) value);
+                    break;
+                default:
+                    throw new InvalidDateException("Error processing map: unexpected key '" + key + "'");
             }
         });
         return userMapper.toDto(userRepository.save(existingUser));

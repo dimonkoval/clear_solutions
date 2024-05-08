@@ -1,5 +1,9 @@
 package org.example.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.example.model.User;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,10 +16,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @Testcontainers
@@ -23,7 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserRepositoryTest {
 
     @Container
-    static MySQLContainer<?> database = new MySQLContainer<>("mysql:8.0.36");
+    private static MySQLContainer<?> database = new MySQLContainer<>("mysql:8.0.36");
+
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeAll
     static void beforeAll() {
@@ -41,9 +44,6 @@ class UserRepositoryTest {
         registry.add("spring.datasource.username", database::getUsername);
         registry.add("spring.datasource.password", database::getPassword);
     }
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Test
     void findByBirthDateBetween_Ok() {
