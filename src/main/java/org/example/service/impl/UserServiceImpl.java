@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.exception.CreateUserException;
@@ -22,16 +23,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Getter
+@Setter
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     @Value("${user.minAge}")
     private int minAge;
-
-    public void setMinAge(int minAge) {
-        this.minAge = minAge;
-    }
 
     @Override
     public UserResponseDto findById(Long id) {
