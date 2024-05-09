@@ -21,7 +21,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private static final String DEFAULT_DATE_TO = "3000-01-01";
     private final UserService userService;
 
     @GetMapping("/{id}")
