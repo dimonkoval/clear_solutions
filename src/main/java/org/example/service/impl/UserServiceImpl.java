@@ -1,7 +1,9 @@
 package org.example.service.impl;
 
+import static org.example.util.Sorting.getSortFromRequestParam;
+
+import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.example.util.AgeCalculator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -72,19 +75,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getUsersByBirthDateRange(LocalDate from, LocalDate to, Boolean isDescendingOrder) {
+    public List<UserResponseDto> getUsersByBirthDateRange(LocalDate from, LocalDate to,
+                                                          Integer count, Integer page, String sortBy) {
 
         if (from.isAfter(to)) {
             throw new InvalidDateException("\"From\" date must be less than \"To\" date");
         }
-        Comparator<UserResponseDto> userComparator = Comparator.comparing(UserResponseDto::getBirthDate);
-        if (isDescendingOrder) {
-            userComparator = userComparator.reversed();
-        }
-        return userRepository.findByBirthDateBetween(from, to)
+
+        PageRequest pageRequest = PageRequest.of(page, count, getSortFromRequestParam(sortBy));
+        return userRepository.findByBirthDateBetween(from, to, pageRequest)
                 .stream()
                 .map(userMapper::toDto)
-                .sorted(userComparator)
                 .collect(Collectors.toList());
     }
 
@@ -92,33 +93,13 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUserPartially(Long id, Map<String, Object> updates) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found by ID " + id));
-
-        User finalExistingUser = existingUser;
         updates.forEach((key, value) -> {
-            switch (key) {
-                case "email":
-                    finalExistingUser.setEmail((String) value);
-                    break;
-                case "firstName":
-                    finalExistingUser.setFirstName((String) value);
-                    break;
-                case "lastName":
-                    finalExistingUser.setLastName((String) value);
-                    break;
-                case "address":
-                    finalExistingUser.setAddress((String) value);
-                    break;
-                case "birthDate":
-                    finalExistingUser.setBirthDate(LocalDate.parse(value.toString()));
-                    break;
-                case "phoneNumber":
-                    finalExistingUser.setPhoneNumber((String) value);
-                    break;
-                case "deleted":
-                    finalExistingUser.setDeleted((Boolean) value);
-                    break;
-                default:
-                    throw new InvalidDateException("Error processing map: unexpected key '" + key + "'");
+            try {
+                Field field = User.class.getDeclaredField(key);
+                field.setAccessible(true);
+                field.set(existingUser, value);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new InvalidDateException("Error processing map: unexpected key '" + key + "'");
             }
         });
         return userMapper.toDto(userRepository.save(existingUser));

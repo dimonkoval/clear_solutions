@@ -1,10 +1,11 @@
 package org.example.service;
 
+import org.example.dto.UserRequestDto;
+import org.example.dto.UserResponseDto;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import org.example.dto.UserRequestDto;
-import org.example.dto.UserResponseDto;
 
 public interface UserService {
     UserResponseDto findById(Long id);
@@ -17,5 +18,6 @@ public interface UserService {
 
     void deleteUser(Long id);
 
-    List<UserResponseDto> getUsersByBirthDateRange(LocalDate from, LocalDate to, Boolean isDescendingOrder);
+    List<UserResponseDto> getUsersByBirthDateRange(LocalDate from, LocalDate to,
+                                                   Integer count, Integer page, String sortBy);
 }

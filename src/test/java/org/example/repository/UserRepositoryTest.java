@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -17,6 +18,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+
+
 
 @DataJpaTest
 @Testcontainers
@@ -49,7 +53,8 @@ class UserRepositoryTest {
     @Test
     void findByBirthDateBetween_Ok() {
         List<User> actual =
-                userRepository.findByBirthDateBetween(LocalDate.of(1900, 1, 1), LocalDate.now());
+                userRepository.findByBirthDateBetween(LocalDate.of(1900, 1, 1),
+                        LocalDate.now(), Pageable.ofSize(10));
         assertEquals(2, actual.size());
     }
 }

@@ -1,19 +1,5 @@
 package org.example.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.exception.CreateUserException;
@@ -28,7 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -159,7 +155,8 @@ class UserServiceImplTest {
     void getUsersByBirthDateRange_Ok() {
         List<User> expectedUsers = new ArrayList<>();
         expectedUsers.add(expectedUser);
-        when(userRepository.findByBirthDateBetween(LocalDate.parse("1900-01-01"), LocalDate.now()))
+        when(userRepository.findByBirthDateBetween(LocalDate.parse("1900-01-01"),
+                LocalDate.now(), Pageable.ofSize(10)))
                 .thenReturn(expectedUsers);
         when(userMapper.toDto(any(User.class))).thenReturn(expectedUserResponseDto);
         List<UserResponseDto> expectedDtoList = expectedUsers
@@ -167,14 +164,16 @@ class UserServiceImplTest {
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
         List<UserResponseDto> actualListDto =
-                userService.getUsersByBirthDateRange(LocalDate.parse("1900-01-01"), LocalDate.now(), false);
+                userService.getUsersByBirthDateRange(LocalDate.parse("1900-01-01"), LocalDate.now(),
+                        10, 0, "id:ASC");
         assertEquals(expectedDtoList, actualListDto);
     }
 
     @Test
     void getUsersByBirthDateRange_ToMoreFrom_NotOk() {
         InvalidDateException exception = assertThrows(InvalidDateException.class, () ->
-                userService.getUsersByBirthDateRange(LocalDate.now(), LocalDate.parse("1900-01-01"),false));
+                userService.getUsersByBirthDateRange(LocalDate.now(), LocalDate.parse("1900-01-01"),
+                        10, 0,"id:ASC"));
         assertEquals("\"From\" date must be less than \"To\" date", exception.getMessage());
 
     }

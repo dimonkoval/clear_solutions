@@ -1,33 +1,27 @@
 package org.example.controller;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Tag(name = "User panel manager", description = "Endpoints for user panel")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final String DEFAULT_DATE_TO = "3000-01-01";
     private final UserService userService;
 
     @GetMapping("/{id}")
@@ -68,10 +62,16 @@ public class UserController {
     @GetMapping("/filter/birthdate")
     @Operation(summary = "Search for users by birth date range and sort.",
             description = " Search for users by birth date range and sort.")
+    @ApiOperation(value = "Get users by birth date range "
+            + "and sorting on [parameter]:[ASC|DESC]")
     public List<UserResponseDto> getUsersByBirthDateRange(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to,
-            @RequestParam(required = false, defaultValue = "false") Boolean isDescendingOrder) {
-        return userService.getUsersByBirthDateRange(from, to, isDescendingOrder);
+            @RequestParam(defaultValue = "10") @ApiParam(value = "default value is '10'") Integer count,
+            @RequestParam(defaultValue = "0") @ApiParam(value = "default value is '0'") Integer page,
+            @RequestParam(defaultValue = "birthDate:ASC;lastName:ASC")
+            @ApiParam(value = "default value is 'id'") String sortBy) {
+
+        return userService.getUsersByBirthDateRange(from, to, count, page, sortBy);
     }
 }
