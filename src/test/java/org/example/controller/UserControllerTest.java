@@ -1,7 +1,15 @@
 package org.example.controller;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.example.dto.UserRequestDto;
 import org.example.dto.UserResponseDto;
 import org.example.service.UserService;
@@ -18,15 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -164,7 +163,7 @@ class UserControllerTest {
                 10, 0, "id:ASC"))
                 .thenReturn(userResponseDtos);
         RestAssuredMockMvc.when()
-                .get("/users//filter/birthdate?from=1900-01-01&to=" + LocalDate.now())
+                .get("/users/filter/birthdate?from=1900-01-01&to=" + LocalDate.now() + "&sortBy=id:ASC")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", Matchers.equalTo(1))

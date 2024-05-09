@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.example.util.Sorting.getSortFromRequestParam;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -155,14 +157,17 @@ class UserServiceImplTest {
     void getUsersByBirthDateRange_Ok() {
         List<User> expectedUsers = new ArrayList<>();
         expectedUsers.add(expectedUser);
+        PageRequest pageRequest = PageRequest.of(0, 10, getSortFromRequestParam("id:ASC"));
+
         when(userRepository.findByBirthDateBetween(LocalDate.parse("1900-01-01"),
-                LocalDate.now(), Pageable.ofSize(10)))
-                .thenReturn(expectedUsers);
+                LocalDate.now(), pageRequest)).thenReturn(expectedUsers);
         when(userMapper.toDto(any(User.class))).thenReturn(expectedUserResponseDto);
+
         List<UserResponseDto> expectedDtoList = expectedUsers
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
+
         List<UserResponseDto> actualListDto =
                 userService.getUsersByBirthDateRange(LocalDate.parse("1900-01-01"), LocalDate.now(),
                         10, 0, "id:ASC");
